@@ -9,7 +9,7 @@ const selectedFile = document.querySelector('#inputFile')
 
 selectedFile.addEventListener('change', () => {
     const file = selectedFile.files[0]
-    // console.log(file)
+
     readFileAndHashIt(file, hashRes)
 })
 
@@ -29,10 +29,13 @@ function readFileAndHashIt(file, dest) {
     
     fr.onload = function () {
         const res = fr.result
+        const t1 = performance.now()
         const hashValue = CryptoJS.MD5(res).toString()
-        console.log(`Hash Value: ${hashValue}`)
+        const t2 = performance.now()
 
-        const card = createCard(file.name, hashValue)
+        const executionTime = t2 - t1
+
+        const card = createCard(file.name, hashValue, executionTime)
 
         dest.insertBefore(card, dest.firstChild)
     }
@@ -40,20 +43,22 @@ function readFileAndHashIt(file, dest) {
     fr.readAsText(file)
 }
 
-function createCard(fileName, hashValue) {
+function createCard(fileName, hashValue, execTime) {
     const card = document.createElement('div')
-    card.className = "bg-blue-100 p-3 sm:p-5 min-w-full max-w-2xl rounded-lg"
+    card.className = "bg-blue-50 p-3 sm:p-5 min-w-full max-w-2xl rounded-lg"
 
     const cardHTML = `
         <div class="flex items-center justify-between space-x-2 sm:space-x-4">
             <h2 class="font-bold max-w-xs sm:max-w-sm md:max-w-md truncate">
-                <span class="text-sm sm:text-md text-blue-400 tracking-wide">Hash Value for</span>
+                <span class="text-sm sm:text-md text-blue-500 tracking-wide">Hash Value for</span>
                 <br>
                 <span class="fileName text-md text-blue-600 tracking-wider">
                     ${fileName}
                 </span>
             </h2>
-            <button aria-label="Copy Text" class="cpyBtn text-blue-600 hover:text-blue-400">
+
+            <button aria-label="Copy Text" title="Copy hash value"
+                class="cpyBtn text-blue-600 hover:text-blue-400">
                 <svg class="w-6 sm:w-7 pointer-events-none" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="feather feather-copy">
@@ -62,6 +67,11 @@ function createCard(fileName, hashValue) {
                 </svg>
             </button>
         </div>
+        <p
+            class="mt-2 text-sm sm:text-md text-green-700 font-semibold max-w-xs sm:max-w-sm md:max-w-md truncate">
+            Execution Time:
+            <span>${execTime}</span>ms
+        </p>
         <p
             class="hashVal mt-2 sm:mt-4 text-lg sm:text-xl max-w-xs sm:max-w-sm md:max-w-md font-bold tracking-wider truncate text-blue-900">
             ${hashValue}
